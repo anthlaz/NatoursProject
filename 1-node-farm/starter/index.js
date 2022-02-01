@@ -44,6 +44,10 @@ const url = require('url');
 
 
 ////////////// ROUTING //////////////
+const data = fs.readFile(`${__dirname}/dev-data/data.json`, 'utf-8')
+const productData = JSON.parse(data);
+
+
 // how do we give a different response depedent on the url path? We can use if/else
 const server = http.createServer((req, res) => {
     const pathName = req.url;
@@ -53,7 +57,9 @@ const server = http.createServer((req, res) => {
     } else if (pathName === '/product') {
         res.end('This is the products page');
     } else if (pathName === '/api') {
-        res.end('API');
+        res.writeHead(200, {
+        'Content-type': 'application/json'});
+        res.end(productData);
     } else {
         res.writeHead(404, {
             'Content-type': 'text/html',
