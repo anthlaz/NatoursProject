@@ -44,8 +44,8 @@ const url = require('url');
 
 
 ////////////// ROUTING //////////////
-const data = fs.readFile(`${__dirname}/dev-data/data.json`, 'utf-8')
-const productData = JSON.parse(data);
+// const data = fs.readFile(`${__dirname}/dev-data/data.json`, 'utf-8')
+// const productData = JSON.parse(data);
 
 
 // how do we give a different response depedent on the url path? We can use if/else
