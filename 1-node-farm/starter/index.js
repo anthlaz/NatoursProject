@@ -43,23 +43,64 @@ const url = require('url');
 // })
 
 
-////////////// ROUTING //////////////
-// const data = fs.readFile(`${__dirname}/dev-data/data.json`, 'utf-8')
-// const productData = JSON.parse(data);
+////////////// READING DATA/FILES ONCE //////////////
 
+// functions
+const replaceTemplate = (template, product) => {
+    let output = template.replace(/{%PRODUCTNAME%}/g, product.productName);
+    output = output.replace(/{%IMAGE%}/g, product.image);
+    output = output.replace(/{%PRICE%}/g, product.price);
+    output = output.replace(/{%FROM%}/g, product.from);
+    output = output.replace(/{%NUTRIENTS%}/g, product.nutrients);
+    output = output.replace(/{%QUANTITY%}/g, product.quantity);
+    output = output.replace(/{%DESCRIPTION%}/g, product.description);
+    output = output.replace(/{%ID%}/g, product.id);
+
+    if (!product.organic) output = output.replace(/{%NOT_ORGANIC%}/g, 'not-organic');
+
+    return output;
+}
+
+// html
+const tempOverview = fs.readFileSync(`${__dirname}/templates/template-overview.html`, 'utf-8')
+const tempProduct = fs.readFileSync(`${__dirname}/templates/template-product.html`, 'utf-8')
+const tempCard = fs.readFileSync(`${__dirname}/templates/template-card.html`, 'utf-8')
+// data
+const data = fs.readFileSync(`${__dirname}/dev-data/data.json`, 'utf-8')
+const productData = JSON.parse(data);
+
+////////////// ROUTING //////////////
 
 // how do we give a different response depedent on the url path? We can use if/else
+
 const server = http.createServer((req, res) => {
     const pathName = req.url;
 
+    // Overview page
     if (pathName === '/' || pathName === '/overview') {
-        res.end('This is overview and or Home');
+        // step 1: load the overview html page - done above
+        // step 2: change response header content type to html 
+        // step 3: iterate through productData so we can send that information back
+        res.writeHead(200, {'Content-type': 'text/html'});
+
+        // we don't want an array but one big string
+        const cardsHtml = productData.map(el => replaceTemplate(tempCard, el)).join('');
+        // replace the placeholder in the template overview html page
+        const output = tempOverview.replace('{%PRODUCT_CARD%}', cardsHtml);
+        console.log(cardsHtml);
+        res.end(output);
+
+    // product page
     } else if (pathName === '/product') {
         res.end('This is the products page');
+
+    // API page
     } else if (pathName === '/api') {
         res.writeHead(200, {
         'Content-type': 'application/json'});
         res.end(productData);
+
+    // Not found page
     } else {
         res.writeHead(404, {
             'Content-type': 'text/html',
