@@ -74,10 +74,12 @@ const productData = JSON.parse(data);
 // how do we give a different response depedent on the url path? We can use if/else
 
 const server = http.createServer((req, res) => {
-    const pathName = req.url;
+    
+    const {query, pathname} = url.parse(req.url, true);
+
 
     // Overview page
-    if (pathName === '/' || pathName === '/overview') {
+    if (pathname === '/' || pathname === '/overview') {
         // step 1: load the overview html page - done above
         // step 2: change response header content type to html 
         // step 3: iterate through productData so we can send that information back
@@ -87,15 +89,21 @@ const server = http.createServer((req, res) => {
         const cardsHtml = productData.map(el => replaceTemplate(tempCard, el)).join('');
         // replace the placeholder in the template overview html page
         const output = tempOverview.replace('{%PRODUCT_CARD%}', cardsHtml);
-        console.log(cardsHtml);
+        // console.log(cardsHtml);
         res.end(output);
 
     // product page
-    } else if (pathName === '/product') {
-        res.end('This is the products page');
+    } else if (pathname === '/product') {
+
+        res.writeHead(200, {'Content-type': 'text/html'});
+
+        // which product do we want to display, we grab it from the productData object
+        const product = productData[query.id];     
+        const output = replaceTemplate(tempProduct, product);
+        res.end(output);
 
     // API page
-    } else if (pathName === '/api') {
+    } else if (pathname === '/api') {
         res.writeHead(200, {
         'Content-type': 'application/json'});
         res.end(productData);
